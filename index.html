@@ -1,0 +1,327 @@
+<html>
+
+	<head>
+	
+		<meta http-equiv="Content-Type"	content="text/html; charset=utf-8" />
+	   	<script src="jquery_1.11.1.min.js"></script>
+	   	<!-- Load the Google AJAX API. -->
+		<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+		
+  		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+		<link rel="stylesheet" href="styles/style.css" type="text/css" />
+  		
+ 		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  		<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>	
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+		
+		<script type="text/javascript" src="lib/Flickr.js"></script>
+<!-- 		<script type="text/javascript" src="lib/MapWidget.js"></script> -->
+        <script src="http://visitvaxjo.disqus.com/embed.js" type="text/javascript" async="true"></script>
+        <!-- Twitter Display Time passed since Tweet -->
+        <script src="timeago.js"></script>
+        <script>
+        // Google Maps from original solution - MapWidget.js
+            $(document).ready(function () {
+                var map;
+
+                var mapElement = document.getElementById("page-middle-map-wrapper");
+                var flickr = new Flickr();
+
+
+                var DEFAULT_MAP_ZOOM = 12;
+                var DEFAULT_MAP_LAT = 56.8770413;
+                var DEFAULT_MAP_LNG = 14.8092744;
+
+                function init() {
+                    initMap();
+                    initFlickr();
+                }
+
+                function initMap() {
+                    map = new google.maps.Map(mapElement, getDefaultMapSettings());
+                    map.setCenter(new google.maps.LatLng(DEFAULT_MAP_LAT, DEFAULT_MAP_LNG));
+                }
+
+                function getDefaultMapSettings() {
+                    return {
+                        zoom: DEFAULT_MAP_ZOOM,
+                        MapTypeId: google.maps.MapTypeId.ROADMAP,
+                        disableDefaultUI: true
+                    };
+                }
+
+                function initFlickr() {
+                    arguments = {
+                        text: "växjö",
+                        per_page: 100,
+                        has_geo: true
+                    }
+
+                    flickr.search(arguments, onFlickerSearchComplete);
+                }
+
+                function onFlickerSearchComplete(data) {
+                    $.each(data.photos.photo, function (i, item) {
+                        flickr.getLocation(item.id, function (response) {
+                            appendToMap(item, response);
+                        });
+                    });
+                }
+
+
+                function appendToMap(item, geoInfo) {
+                    var infoWindow = new google.maps.InfoWindow();
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: new google.maps.LatLng(geoInfo.photo.location.latitude, geoInfo.photo.location.longitude),
+                        title: item.title
+                    });
+
+                    var wrapper = document.createElement("div");
+                    var image = document.createElement("img");
+                    image.src = "http://farm" + item.farm + ".static.flickr.com/" + item.server + "/" + item.id + "_" + item.secret + "_q.jpg";
+
+                    wrapper.appendChild(image);
+
+                    google.maps.event.addListener(marker, 'click', function (event) {
+                        infoWindow.setContent(wrapper.innerHTML);
+                        infoWindow.open(map, marker);
+                        map.setCenter(marker.getPosition());
+                    });
+                }
+
+                init();
+
+            });
+
+            //   Tweets
+            $(document).ready(function () {
+                $("#twt").click(function () {
+                    $.ajax({
+                        type: 'GET',
+                        dataType: 'json',
+                        data: 'data=yeah',
+                        //json: 'callback',
+                        url: 'http://localhost:5000/getTweets'
+                    })
+                    // url:"http://lisarueh.crater.uberspace/nodejs/4ME107_Assignment3/lib/twitter.js/getTweets",
+
+                    .done(function (response) {
+
+                        var objT = response;
+                        var contentT;
+
+                        contentT = '<div id=tweetwrap>';
+                        for (var i = 0; i < 4; i++) {
+                            console.log(i);
+                             console.log(contentT);
+                            contentT += '</br><a class="tweetlink" target="_blank" href="http://twitter.com/' + objT.statuses[i].user.screen_name + '">' + objT.statuses[i].user.screen_name + '</a><img class="tweetimg" src="' + objT.statuses[i].user.profile_image_url + '"><p class="tweetfeed">' + objT.statuses[i].text + '</p><span class="timeago" title="' + objT.statuses[i].created_at + '"></span>';
+                            console.log(contentT);
+                        }
+                        contentT += '</div>';
+                        $('#page-right-twitter-result-wrapper').append(contentT);
+                        // Testing:
+                        //alert('timeago');
+                        $(".timeago").timeago();
+                    });
+                });
+            });
+
+            // Eventful Data
+            $(document).ready(function () {
+                $("#rssRedirect").click(function () {
+                    var within = $("#event-range").val();
+                  //  alert(within);
+                    $.ajax({
+                        type: 'GET',
+                        dataType: 'jsonp',
+                        data: 'data=yeah',
+                        jsonp: 'callback',
+                        url: 'http://localhost:5000/getEventful/' + within
+                    })
+                    // url:"http://lisarueh.crater.uberspace/nodejs/4ME107_Assignment3/lib/twitter.js/getTweets",
+
+                    .done(function (response) {
+                        //  Test function
+                    //    alert(within);
+                        $("#page-right-event-result-wrapper").empty();
+                        console.log('empty');
+                        console.log('hallo');
+                        var data = JSON.stringify(response);
+                        var objE = $.parseJSON(data);
+
+                        var contentE;
+                        contentE = '<div>';
+                        for (var i = 0; i <= 3; i++) {
+                            contentE += '<p class="mytitle"><strong><a href="' + objE.rss.channel[0].item[i].guid[0]._ + '"> ' + objE.rss.channel[0].item[i].title[0] + '</a></p>';
+                            contentE += '<small><em>starts on ' + objE.rss.channel[0].item[i].pubDate[0] + '</em></small></p><hr /><span class="sep"></span>';
+                        }
+                        contentE += '</div>';
+                        $('#page-right-event-result-wrapper').append(contentE);
+                    });
+                });
+            });
+
+            //Hotel Data
+            $(document).ready(function () {
+
+                $("#hotel-range-min").mousemove(function (e) {
+                    $("#hotel-range-min-value").html($(this).val());
+                });
+
+                $("#hotel-range-min").change(function (e) {
+                    $("#hotel-range-min-value").html($(this).val());
+                });
+                $("#hotel-range-max").mousemove(function (e) {
+                    $("#hotel-range-max-value").html($(this).val());
+                });
+
+                $("#hotel-range-min").change(function (e) {
+                    $("#hotel-range-min-value").html($(this).val());
+                });
+            });
+
+            $(document).ready(function () {
+                $("#hotel-submit-btn").click(function () {
+                    var urlmin = $("#hotel-range-min").val();
+                    var urlmax = $("#hotel-range-max").val();
+                    // Testing issues:
+                    // alert($("#hotel-range-min").val());
+                    $.ajax({
+                        type: 'GET',
+                        dataType: 'json',
+                        url: 'http://localhost:5000/getHotel/' + urlmin + '/' + urlmax 
+                    })
+
+                    
+                    .done(function (response) {
+                        console.log('hi');
+
+                        $("#page-right-hotel-result-wrapper").empty();
+                        console.log('empty');
+                        var data = JSON.stringify(response);
+                        var objH = $.parseJSON(data);
+                        var objH = response;
+                        var contentH;
+
+                        var hotelInfo = JSON.parse(JSON.stringify(objH));
+
+                        contentH = '<table><tr><th>Name</th><th>Stars</th><th>Price</th></tr>';
+                        for (var i = 0; i < hotelInfo.length; i++) {
+                            contentH += '<tr><td><a  target="_blank" href="' + hotelInfo[i].externalLink + '">' + hotelInfo[i].name + '</a></td><td style="min-width:30px"><center>' + hotelInfo[i].stars + '</center></td><td style="min-width:30px"><center>' + hotelInfo[i].price + '</center></td></tr>';
+                        }
+                        contentH += '</table>';
+                        $('#page-right-hotel-result-wrapper').html('');
+                        $('#page-right-hotel-result-wrapper').append(contentH);
+                    });
+                });
+            });
+
+            // eBay Data
+            $(document).ready(function () {
+
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    data: 'data=yeah',
+                    //json: 'callback',
+                    url: 'http://localhost:5000/getEbay'
+                })
+
+                .done(function (response) {
+                    //  console.log('hallo');
+                    //  var data = JSON.stringify(response);
+                    //  var objT = $.parseJSON(data);
+                    var objEb = response;
+                    var contentEb;
+                    contentEb = '<table>';
+                    for (var i = 0; i < objEb.length; i++) {
+                        contentEb += '<tr><td><a href="' + objEb[i].viewItemURL + '">' + objEb[i].title + '</a></td><td><img src="' + objEb[i].galleryURL + '"></td></tr>'
+                    }
+                    contentEb += '</table>';
+                    $('#ebayResults').append(contentEb);
+                });
+            });
+
+        </script>
+
+	</head>
+
+	<body>
+
+		<div id="page-wrapper">
+			<div id="page-middle-wrapper">
+				<div id="page-middle-map-wrapper"></div>
+			</div>
+			<div id="page-right-wrapper">
+				<div id="page-right-hotel-wrapper">
+					<h2>Check out some of the upcoming events around V&auml;xj&ouml;</h2>
+					<p>Select the distance in KM from V&auml;xj&ouml; .</p>
+					<hr />
+					<form>
+					<h2>within?</h2>
+						<select id="event-range"> 
+							<option value="25">25</option>
+							<option value="50">50</option>
+							<option value="75">75</option>
+							<option value="100">100</option> 
+						</select> KM 
+						<button type="button" id="rssRedirect">search events</button>
+					</form>
+					<div id="page-right-event-result-wrapper">
+					</div>
+					
+				</div>
+				<div id="page-right-Twitter-wrapper">
+						<h2>Check out the latest Tweets #V&auml;xj&ouml;</h2>
+						<hr />
+						<form>
+							<button type="button" id="twt">search Tweets</button>
+						</form>
+						<div id="page-right-twitter-result-wrapper"></div>
+					</div>
+					<div id="page-right-hotel-wrapper">
+            			<h2>Need a place to stay?</h2>
+            			<p>Set a price range that fits your wallet and we will find a hotel in V&auml;xj&ouml; that suits you.</p>
+            			<hr />
+            			<form>
+            			    <p>Minimum price: &euro;<span id="hotel-range-min-value">0</span></p>
+              				<input id="hotel-range-min" type="range" min="0" max="200" value="0" />
+                			<p>Maximum price: &euro;<span id="hotel-range-max-value">200</span></p>
+                			<input id="hotel-range-max" type="range" min="0" max="200" value="200" /> 
+                			<button id="hotel-submit-btn" type="button">Find hotel</button>
+            			</form>
+			            <div id="page-right-hotel-result-wrapper"></div>
+        			</div>
+        			<div id="page-right-compare-wrapper">
+						<h2>What about the weather?</h2>
+						<p>Compare the weather in your city with the weather in V&auml;xj&ouml;. Enter your city's name and the date of weather comparison.</p>
+						<hr />
+						<form>
+							<input id="compare-town" type="text" placeholder="Berlin" /> <input id="datepicker" type="text" placeholder="11/12/2013" /> 
+							<button id="compare-submit-btn">Compare weather</button>
+							<div id="page-right-compare-result-wrapper"></div>
+						</form>
+					</div>
+			</div>
+            <div id="page-left-wrapper">
+					<div id="page-left-ebay-wrapper">
+						<h2>Latest sales on EBay regarding V&auml;xj&ouml;</h2>
+						<div id="ebayResults"></div>
+					</div>
+					<div id="page-left-disqus-wrapper">
+						<h2>Do you have something you want to discuss?</h2>
+						<p>This discussion thread is open for discussion.</p>
+						<hr />
+						<div id="disqus_thread"></div>
+					</div>
+					<div id="page-left-weather-wrapper">
+						<h2>What is the forecast?</h2>
+						<p>Here is the local weather forecast for the next couple of days.</p>
+						<hr />
+						<div id="page-left-weather-forecast-wrapper"></div>
+					</div>
+				</div>
+		</div>
+	</body>
+</html>
