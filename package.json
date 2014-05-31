@@ -1,0 +1,37 @@
+{
+  "name": "4ME107_Assignment3.1_Rueh_Pol",
+  "description": "VaxjoAtHandClient",
+  "version": "0.1.1",
+  "homepage": "",
+  "author": {
+    "name": "Lisa Marie Ruehmann and Natali Polishuk",
+    "email": "lr222gu@student.lnu.se, ",
+    "url": "http://lisarueh.crater.uberspace.de/4ME107_Assignment3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Lm0490/4me107_assig3.1.git"
+  },
+  "main": "app.js",
+  "dependencies": {
+    "async": "~0.1.22",
+    "restler": "~2.0.1",
+    "underscore": "~1.3.3",
+    "xml": "0.0.7",
+    "xml2js": "~0.1.14"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": ">= 0.6"
+  },
+  "readme": "Mashup Service for a project at LNU\n===============\n\n## Background\n\nThis was built to enhance a previous mashup with nodeJS.",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/Lm0490/4me107_assig3.1/issues"
+  },
+  "_id": "4me107_assig3@0.1.1",
+  "_shasum": "3af390787e3620a9fed39677b9525857d8605cf5",
+  "_from": "ebay-api@",
+  "_resolved": "https://registry.npmjs.org/ebay-api/-/ebay-api-0.1.1.tgz"
+}

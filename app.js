@@ -14,7 +14,7 @@ var fs = require('fs'),
 	xml2js = require('xml2js');
 // eBay
 var ebay = require('./ebayIndex.js');
-// Hotel / Kayak
+// Hotel / Kayak / wolfarm alpha
 var simplexml=require('xml-simple');
 var request = require('request');
 var hotel_config= {host:'www.kayak.com', path:'/h/rss/hotelrss/SE/vaxjo?mc=EUR', port:80}, hotel_body='';
@@ -22,6 +22,8 @@ var arrhotel = []; //Array of the hotels
 
 // parser 
 var parser = new xml2js.Parser(); // parser eventful
+var parserW = new xml2js.Parser(); // parser wolfarm alpha
+var parserW2 = new xml2js.Parser();  // parser wolfarm alpha
 
 // all environments + uberspace port (65535)
 app.set('port', process.env.PORT || 5000);
@@ -197,6 +199,79 @@ function return_matches( min ,  max ) { //return only kayak hotels within price 
 	//console.log("matches= \n" + matches);
 	return matches; 
 }
+
+//wolfarm alpha weather comperhation
+  app.get('/getWeather/:town/:month/:day/:year', function(req, res) {
+  		console.log('inside getWeather');
+		//	for avoiding crossbrowser-error
+		res.header('Access-Control-Allow-Origin', '*');
+   		res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+   		res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+		
+		res.header('Content-type','application/json');
+		res.header('Charset','utf8');
+	
+		var paramsW = querystring.parse(url.parse(req.url).query);
+		//var months = new Array('january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december');
+
+		var day = req.param("day");
+		var month = req.param("month");
+		var year = req.param("year");
+		var town = req.param("town");
+		//var test = req.param("town");
+		//console.log(test);
+		console.log(town);
+		
+    	var roW = {};
+    	parserW.addListener('end', function(result) {
+    		roW = JSON.stringify(result);
+    		//console.log(roW);
+			res.send(req.query.callback + '(' + roW + ');');
+		});
+
+		
+			var requestW = require('request');
+			requestW('http://api.wolframalpha.com/v2/query?input=weather%20'+town+'%20'+month+'%20'+day+'%20'+year+'&appid=RTEKWJ-G4HPJ346G5', function (error, responseW, body) {
+  				if (!error && responseW.statusCode == 200) {
+    				parserW.parseString(body, function(){
+    					res.end();
+    				});
+  				}
+			});
+  });
+
+	
+	app.get('/getWeather2/vaxjo/:month/:day/:year', function(req, res) {
+	
+		res.header('Content-type','application/json');
+		res.header('Charset','utf8');
+		var paramsW2 = querystring.parse(url.parse(req.url).query);
+		console.log('insidew2')
+	
+
+		var day = req.param("day");
+		var month = req.param("month");
+		var year = req.param("year");
+		
+    	var roW2 = {};
+    	parserW2.addListener('end', function(result) {
+    		roW2 = JSON.stringify(result);
+    		//console.log(ro2);
+			res.send(req.query.callback + '(' + roW2 + ');');
+		});
+		
+			var requestW2 = require('request');
+		  requestW2('http://api.wolframalpha.com/v2/query?input=weather%20vaxjo%20'+month+'%20'+day+'%20'+year+'&appid=RTEKWJ-G4HPJ346G5', function (errorW2, responseW2, bodyW2) {
+
+
+  				if (!errorW2 && responseW2.statusCode == 200) {
+    				parserW2.parseString(bodyW2, function(){
+    					res.end();
+    				});
+  				}
+			});
+  });
+
 
 
 

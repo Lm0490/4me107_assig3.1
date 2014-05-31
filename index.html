@@ -115,7 +115,7 @@
                         for (var i = 0; i < 4; i++) {
                             console.log(i);
                              console.log(contentT);
-                            contentT += '</br><a class="tweetlink" target="_blank" href="http://twitter.com/' + objT.statuses[i].user.screen_name + '">' + objT.statuses[i].user.screen_name + '</a><img class="tweetimg" src="' + objT.statuses[i].user.profile_image_url + '"><p class="tweetfeed">' + objT.statuses[i].text + '</p><span class="timeago" title="' + objT.statuses[i].created_at + '"></span>';
+                            contentT += '</br><img class="tweetimg" src="' + objT.statuses[i].user.profile_image_url + '"><a class="tweetlink" target="_blank" href="http://twitter.com/' + objT.statuses[i].user.screen_name + '">' + objT.statuses[i].user.screen_name + '</a><p class="tweetfeed">' + objT.statuses[i].text + '</p><span class="timeago" title="' + objT.statuses[i].created_at + '"></span>';
                             console.log(contentT);
                         }
                         contentT += '</div>';
@@ -242,6 +242,65 @@
                     $('#ebayResults').append(contentEb);
                 });
             });
+            
+            //wolfram weather comprahation
+
+            $(document).ready(function () {
+                $("#compare-weather-submit-btn").click(function () {
+                    var urltown = $("#town").val();
+                    var date = $('#datepicker').val().split('-');
+                    var year = date[0];
+                    var month = date[1];
+                    var day = date[2];
+                    $.ajax({
+                        type: 'GET',
+                        dataType: 'jsonp',
+                        data: "data=yeah",
+                        url: 'http://localhost:5000/getWeather/' + urltown + '/' + month + '/' + day + '/' + year
+                    })
+
+                      .done(function (response) {
+                          console.log('hi');
+                          var data = JSON.stringify(response);
+                          var objW = $.parseJSON(data);
+                          var objW = response;
+                          var contentW;
+
+                          var WInfo = JSON.parse(JSON.stringify(objW));
+                          contentW = '<div>';
+                          contentW += '<p><strong>' + WInfo.queryresult.pod[0].subpod[0].plaintext + '</strong></br>' + WInfo.queryresult.pod[1].subpod[0].plaintext + '</p>';
+                          contentW += '</div>';
+                          $('#mycity').html('');
+                          $('#mycity').append(contentW);
+                      });
+                        $.ajax({
+                        type: 'GET',
+                        dataType: 'jsonp',
+                        data: "data=yeah",
+                        //jsonp: 'callback',
+                        // url: 'http://localhost:5000/getWeather/'+ month +'/' + year +'/' + day
+                        url: 'http://localhost:5000/getWeather2/Vaxjo/' + month + '/' + day + '/' + year
+                    })
+
+                      .done(function (response2) {
+                          console.log('hi');
+                          var data2 = JSON.stringify(response2);
+                          var objW2 = $.parseJSON(data2);
+                          var objW2 = response2;
+                          var contentW2;
+
+                          var WInfo2 = JSON.parse(JSON.stringify(objW2));
+                          contentW2 = '<div>';
+                          contentW2 += '<p><strong>' + WInfo2.queryresult.pod[0].subpod[0].plaintext + '</strong></br>' + WInfo2.queryresult.pod[1].subpod[0].plaintext + '</p>';
+                          contentW2 += '</div>';
+                          $('#myvaxjo').html('');
+                          $('#myvaxjo').append(contentW2);
+                      });
+                });
+            });
+
+            //  function compareWeather() {
+
 
         </script>
 
@@ -297,11 +356,15 @@
 						<h2>What about the weather?</h2>
 						<p>Compare the weather in your city with the weather in V&auml;xj&ouml;. Enter your city's name and the date of weather comparison.</p>
 						<hr />
-						<form>
-							<input id="compare-town" type="text" placeholder="Berlin" /> <input id="datepicker" type="text" placeholder="11/12/2013" /> 
-							<button id="compare-submit-btn">Compare weather</button>
-							<div id="page-right-compare-result-wrapper"></div>
-						</form>
+				<form>
+				<input id="town" type="text" value="Tel Aviv"/>
+				<input id="datepicker" type="date" value="11/12/2013" />
+				<button  type="button" id="compare-weather-submit-btn">Compare weather</button>
+				<div id="page-right-compare-result-wrapper">
+                <div id="mycity"></div>
+                     <div id="myvaxjo"></div>
+                </div>
+			</form>
 					</div>
 			</div>
             <div id="page-left-wrapper">
