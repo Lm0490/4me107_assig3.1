@@ -1,0 +1,19 @@
+#site-notice-wrapper {
+	border: 1px solid #DBDBDB;
+	background-color: white;
+	padding: 25px;
+	margin-bottom: 25px;
+	width: 150%;
+}
+
+.site-notice-wrapper {
+	width: 135px;
+	display: inline-table;
+	text-align: center;
+	padding: 5px;
+}
+
+.site-notice-wrapper p {
+	font-size: 11px;
+	margin-top: 5px;
+}
